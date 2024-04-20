@@ -15,16 +15,13 @@ import {
   event_types,
 } from "../../../../script.js";
 
-eventSource.on(event_types.MESSAGE_EDITED, handleMessageEdited);
-eventSource.on(event_types.USER_MESSAGE_RENDERED, handleUserMessageRendered);
-eventSource.on(event_types.CHAT_CHANGED, handleChatChanged);
-
 // Related events
 // MESSAGE_SENT
 // MESSAGE_EDITED
 // CHAT_CHANGED - load feedback
 // Refer to plugin: translate
-// TODO: move event triggers to the main script
+// Actually, may need to load more input feedback when "show more messages" is clicked, but no event for that yet
+// TODO: move getContext into functions
 
 const context = getContext();
 
@@ -110,4 +107,9 @@ jQuery(async () => {
 
   // Load settings when starting things up (if you have any)
   loadSettings();
+
+  // Register event listeners
+  eventSource.on(event_types.MESSAGE_EDITED, handleMessageEdited);
+  eventSource.on(event_types.USER_MESSAGE_RENDERED, handleUserMessageRendered);
+  eventSource.on(event_types.CHAT_CHANGED, handleChatChanged);
 });
