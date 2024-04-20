@@ -43,6 +43,14 @@ function handleUserMessageRendered(messageId) {
 
 function handleChatChanged() {
   console.log("[InputFeedback] Chat changed");
+  const messages = context.chat;
+  messages.forEach((message, index) => {
+    if (message.is_user) {
+      $(`.mes[mesid="${index}"] .mes_block`).append(
+        `<div class="input-feedback">Input feedback</div>`
+      );
+    }
+  });
 }
 
 // Keep track of where your extension is located, name should match repo name
