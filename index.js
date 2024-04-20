@@ -1,6 +1,3 @@
-// The main script for the extension
-// The following are examples of some basic extension functionality
-
 //You'll likely need to import extension_settings, getContext, and loadExtensionSettings from extensions.js
 import {
   extension_settings,
@@ -15,12 +12,31 @@ import {
   event_types,
 } from "../../../../script.js";
 
+// Keep track of where your extension is located, name should match repo name
+const extensionName = "SillyTavern-InputFeedback";
+const extensionFolderPath = `scripts/extensions/third-party/${extensionName}`;
+const extensionSettings = extension_settings[extensionName];
+const defaultSettings = {};
+
 // Related events
-// MESSAGE_SENT
-// MESSAGE_EDITED
+// MESSAGE_SENT - get feedback
+// MESSAGE_EDITED - get feedback
+// USER_MESSAGE_RENDERED - render feedback
+// maybe rendering should not happen in handleUserMessageRendered, but after getting result from llm
 // CHAT_CHANGED - load feedback
-// Refer to plugin: translate
-// Actually, may need to load more input feedback when "show more messages" is clicked, but no event for that yet
+
+// Actually, may need to load more input feedback when "show more messages" is clicked, but no event for that yet;
+// but its less urgent, as older language feedback is less useful
+
+// Refer to plugin: translate, memory (summarize)
+// TODO: add settings: language, prompt
+// TODO: add feedback interface
+// TODO: write feedback to chat file
+// TODO: actually get feedback from llm
+// TODO: remove blue backgroud
+
+// The main script for the extension
+// The following are examples of some basic extension functionality
 
 function handleMessageEdited(messageId) {
   const context = getContext();
@@ -51,12 +67,6 @@ function handleChatChanged() {
     }
   });
 }
-
-// Keep track of where your extension is located, name should match repo name
-const extensionName = "SillyTavern-InputFeedback";
-const extensionFolderPath = `scripts/extensions/third-party/${extensionName}`;
-const extensionSettings = extension_settings[extensionName];
-const defaultSettings = {};
 
 // Loads the extension settings if they exist, otherwise initializes them to the defaults.
 async function loadSettings() {
