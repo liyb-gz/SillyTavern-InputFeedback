@@ -21,24 +21,26 @@ import {
 // CHAT_CHANGED - load feedback
 // Refer to plugin: translate
 // Actually, may need to load more input feedback when "show more messages" is clicked, but no event for that yet
-// TODO: move getContext into functions
-
-const context = getContext();
 
 function handleMessageEdited(messageId) {
+  const context = getContext();
   console.log("[InputFeedback] Message edited triggered. id: ", messageId);
   console.log("[InputFeedback] message: ", context.chat[messageId]);
 }
 
 function handleUserMessageRendered(messageId) {
+  const context = getContext();
+  const message = context.chat[messageId];
   console.log("[InputFeedback] User message rendered. id: ", messageId);
-  console.log("[InputFeedback] message: ", context.chat[messageId]);
+  console.log("[InputFeedback] message: ", message);
+
   $(`.mes[mesid="${messageId}"] .mes_block`).append(
     `<div class="input-feedback">Input feedback</div>`
   );
 }
 
 function handleChatChanged() {
+  const context = getContext();
   console.log("[InputFeedback] Chat changed");
   const messages = context.chat;
   messages.forEach((message, index) => {
