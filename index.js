@@ -34,36 +34,59 @@ const defaultSettings = {};
 // TODO: write feedback to chat file
 // TODO: actually get feedback from llm
 // TODO: remove blue backgroud
+// TODO: display: use other method than .append
 
 // The main script for the extension
 // The following are examples of some basic extension functionality
 
-function handleMessageEdited(messageId) {
-  const context = getContext();
-  console.log("[InputFeedback] Message edited triggered. id: ", messageId);
-  console.log("[InputFeedback] message: ", context.chat[messageId]);
+function getFeedback(message) {
+  if (typeof message.extra !== "object") {
+    message.extra = {};
+  }
+
+  message.extra.inputFeedback = `Input feedback - ${new Date().toLocaleString()}`;
 }
 
-function handleUserMessageRendered(messageId) {
+function displayFeedback(messageId, messageStr) {
+  $(`.mes[mesid="${messageId}"] .mes_block`).append(
+    `<div class="input-feedback">${messageStr}</div>`
+  );
+}
+
+function handleMessageEdited(messageId) {
   const context = getContext();
   const message = context.chat[messageId];
-  console.log("[InputFeedback] User message rendered. id: ", messageId);
-  console.log("[InputFeedback] message: ", message);
 
-  $(`.mes[mesid="${messageId}"] .mes_block`).append(
-    `<div class="input-feedback">Input feedback</div>`
-  );
+  if (message?.is_user) {
+    getFeedback(message);
+    displayFeedback(messageId, message.extra?.inputFeedback);
+  }
+
+  console.log("[InputFeedback] Message edited triggered. id: ", messageId);
+  console.log("[InputFeedback] message: ", message);
+}
+
+function handleMessageSent(messageId) {
+  const context = getContext();
+  const message = context.chat[messageId];
+
+  if (message.is_user) {
+    getFeedback(message);
+    displayFeedback(messageId);
+  }
+
+  console.log("[InputFeedback] Message sent triggered. id: ", messageId);
+  console.log("[InputFeedback] message: ", message);
 }
 
 function handleChatChanged() {
   const context = getContext();
   console.log("[InputFeedback] Chat changed");
   const messages = context.chat;
+  console.log("[InputFeedback] messages:", messages);
   messages.forEach((message, index) => {
-    if (message.is_user) {
-      $(`.mes[mesid="${index}"] .mes_block`).append(
-        `<div class="input-feedback">Input feedback</div>`
-      );
+    if (message.is_user && message.extra?.inputFeedback) {
+      displayFeedback(index, message.extra?.inputFeedback);
     }
   });
 }
@@ -122,6 +145,6 @@ jQuery(async () => {
 
   // Register event listeners
   eventSource.on(event_types.MESSAGE_EDITED, handleMessageEdited);
-  eventSource.on(event_types.USER_MESSAGE_RENDERED, handleUserMessageRendered);
+  eventSource.on(event_types.MESSAGE_SENT, handleMessageSent);
   eventSource.on(event_types.CHAT_CHANGED, handleChatChanged);
 });
