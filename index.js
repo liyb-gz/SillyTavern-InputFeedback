@@ -76,7 +76,11 @@ function handleMessageEdited(messageId) {
   const context = getContext();
   const message = context.chat[messageId];
 
-  if (message?.is_user) {
+  // only initiate feedback if the message has changed
+  if (
+    message?.is_user &&
+    message.extra?.inputFeedback.message !== message.mes
+  ) {
     getFeedback(messageId, message);
   }
 
