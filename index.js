@@ -39,18 +39,37 @@ const defaultSettings = {};
 // The main script for the extension
 // The following are examples of some basic extension functionality
 
-function getFeedback(message) {
+function timeout(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function displayFeedback(messageId, messageStr) {
+  console.log("[InputFeedback] displayFeedback");
+  let feedbackDiv = $(`.mes[mesid="${messageId}"] .mes_block .input-feedback`);
+  if (feedbackDiv.length) {
+    // If the div already exists, replace its content
+    feedbackDiv.html(messageStr);
+  } else {
+    // If the div doesn't exist, create it
+    $(`.mes[mesid="${messageId}"] .mes_block`).append(
+      `<div class="input-feedback">${messageStr}</div>`
+    );
+  }
+}
+
+async function getFeedback(messageId, message) {
   if (typeof message.extra !== "object") {
     message.extra = {};
   }
 
-  message.extra.inputFeedback = `Input feedback - ${new Date().toLocaleString()}`;
-}
+  await timeout(2000);
 
-function displayFeedback(messageId, messageStr) {
-  $(`.mes[mesid="${messageId}"] .mes_block`).append(
-    `<div class="input-feedback">${messageStr}</div>`
-  );
+  message.extra.inputFeedback = {
+    message: message.mes,
+    feedback: `Input feedback - ${new Date().toLocaleString()}`,
+  };
+
+  displayFeedback(messageId, message.extra.inputFeedback.feedback);
 }
 
 function handleMessageEdited(messageId) {
@@ -58,8 +77,7 @@ function handleMessageEdited(messageId) {
   const message = context.chat[messageId];
 
   if (message?.is_user) {
-    getFeedback(message);
-    displayFeedback(messageId, message.extra?.inputFeedback);
+    getFeedback(messageId, message);
   }
 
   console.log("[InputFeedback] Message edited triggered. id: ", messageId);
@@ -71,8 +89,7 @@ function handleMessageSent(messageId) {
   const message = context.chat[messageId];
 
   if (message.is_user) {
-    getFeedback(message);
-    displayFeedback(messageId);
+    getFeedback(messageId, message);
   }
 
   console.log("[InputFeedback] Message sent triggered. id: ", messageId);
@@ -86,7 +103,7 @@ function handleChatChanged() {
   console.log("[InputFeedback] messages:", messages);
   messages.forEach((message, index) => {
     if (message.is_user && message.extra?.inputFeedback) {
-      displayFeedback(index, message.extra?.inputFeedback);
+      displayFeedback(index, message.extra?.inputFeedback.feedback);
     }
   });
 }
