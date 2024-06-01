@@ -10,6 +10,7 @@ import {
   saveSettingsDebounced,
   eventSource,
   event_types,
+  generateRaw,
 } from "../../../../script.js";
 
 // Keep track of where your extension is located, name should match repo name
@@ -30,11 +31,11 @@ const defaultSettings = {};
 
 // Refer to plugin: translate, memory (summarize)
 // TODO: add settings: language, prompt
-// TODO: add feedback interface
-// TODO: write feedback to chat file
-// TODO: actually get feedback from llm
+// TODO: take prompt from settings
+// TODO: add feedback interface folding
+// TODO: add feedback waiting animation
 // TODO: remove blue backgroud
-// TODO: display: use other method than .append
+// TODO: display feedback as markdown
 
 // The main script for the extension
 // The following are examples of some basic extension functionality
@@ -58,15 +59,20 @@ function displayFeedback(messageId, messageStr) {
 }
 
 async function getFeedback(messageId, message) {
+  const feedbackPrompt =
+    "上記の文を文法と自然さの観点で確認し、まず訂正された文を提供してください。その際、文の丁寧さと調子を変えないでください、ロールプレイの途中にありますから。その後、文の自然さと文法の正確さに関するフィードバックを提供してください。問題がない場合は、「問題ありません」と記載してください。";
   if (typeof message.extra !== "object") {
     message.extra = {};
   }
 
-  await timeout(2000);
+  const prompt = `${message.mes}\n\n---\n\n${feedbackPrompt}`;
+
+  const feedback = await generateRaw(prompt, null, false, true);
 
   message.extra.inputFeedback = {
+    // Save the original message for comparison later
     message: message.mes,
-    feedback: `Input feedback - ${new Date().toLocaleString()}`,
+    feedback,
   };
 
   displayFeedback(messageId, message.extra.inputFeedback.feedback);
