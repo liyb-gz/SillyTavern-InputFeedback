@@ -1,1 +1,12 @@
-/* All style elements for your extension go here */
+.input-feedback.inline-drawer {
+  background: var(--greyCAIbg);
+  margin-bottom: 5px;
+  border-radius: 10px;
+  padding: 0 10px;
+  border: 1px solid var(--SmartThemeBorderColor);
+  transition: all 250ms;
+}
+
+.input-feedback.inline-drawer .inline-drawer-header {
+  color: var(--SmartThemeEmColor);
+}

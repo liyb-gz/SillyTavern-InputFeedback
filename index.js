@@ -11,6 +11,7 @@ import {
   eventSource,
   event_types,
   generateRaw,
+  messageFormatting,
 } from "../../../../script.js";
 
 // Keep track of where your extension is located, name should match repo name
@@ -39,16 +40,32 @@ const defaultSettings = {};
     -   feedback default folding
  */
 // TODO: take prompt from settings
-// TODO: add feedback interface folding
 // TODO: add feedback waiting animation
 // TODO: remove blue backgroud
-// TODO: display feedback as markdown
+// TODO: delete a feedback
+// TODO: purge feedback
 
 // The main script for the extension
 
 function getMessage(messageId) {
   const context = getContext();
   return context.chat[messageId];
+}
+
+function drawer(content, expended = false) {
+  const direction = expended ? "up" : "down";
+  const html = `
+  <div class="inline-drawer input-feedback">
+    <div class="inline-drawer-toggle inline-drawer-header">
+      <span data-i18n="[title]Input Feedback">Input Feedback</span>
+      <div class="inline-drawer-icon fa-solid fa-circle-chevron-${direction} ${direction}"></div>
+    </div>
+    <div class="inline-drawer-content" ${
+      expended && `style="display:block"`
+    }>${messageFormatting(content)}</div>
+  </div>`;
+
+  return html;
 }
 
 function displayFeedback(messageId) {
@@ -64,9 +81,7 @@ function displayFeedback(messageId) {
     feedbackDiv.html(feedback);
   } else {
     // If the div doesn't exist, create it
-    $(`.mes[mesid="${messageId}"] .mes_block`).append(
-      `<div class="input-feedback">${feedback}</div>`
-    );
+    $(`.mes[mesid="${messageId}"] .mes_block`).append(drawer(feedback));
   }
 }
 
