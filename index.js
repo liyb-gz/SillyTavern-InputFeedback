@@ -46,38 +46,56 @@ const defaultSettings = {};
 
 // The main script for the extension
 
-function displayFeedback(messageId, messageStr) {
-  let feedbackDiv = $(`.mes[mesid="${messageId}"] .mes_block .input-feedback`);
+function getMessage(messageId) {
+  const context = getContext();
+  return context.chat[messageId];
+}
+
+function displayFeedback(messageId) {
+  const message = getMessage(messageId);
+
+  const feedbackDiv = $(
+    `.mes[mesid="${messageId}"] .mes_block .input-feedback`
+  );
+  const feedback = message?.extra?.inputFeedback?.feedback;
+
   if (feedbackDiv.length) {
     // If the div already exists, replace its content
-    feedbackDiv.html(messageStr);
+    feedbackDiv.html(feedback);
   } else {
     // If the div doesn't exist, create it
     $(`.mes[mesid="${messageId}"] .mes_block`).append(
-      `<div class="input-feedback">${messageStr}</div>`
+      `<div class="input-feedback">${feedback}</div>`
     );
   }
 }
 
+function addFeedbackButton(messageId) {
+  $(`.mes[mesid=${messageId}] .mes_block .extraMesButtons`).append(
+    `<div title="Request Feedback" class="mes_feedback fa-solid fa-spell-check" data-i18n="[title]Request Feedback"></div>`
+  );
+}
+
 function getPreviousMessages(messageId, numberOfPreviousMessages) {
-  const context = getContext();
-  const chats = context.chat;
   const previousMessages = [];
   for (
     let i = messageId - 1;
     i >= 0 && i >= messageId - numberOfPreviousMessages;
     i--
   ) {
-    const message = `${chats[i].name}: ${chats[i].mes}`;
-    previousMessages.unshift(message);
+    const message = getMessage(i);
+    const messageStr = `${message.name}: ${message.mes}`;
+    previousMessages.unshift(messageStr);
   }
   return previousMessages.join("\n\n");
 }
 
-async function getFeedback(messageId, message) {
+async function getFeedback(messageId) {
   const numberOfPreviousMessages = 5;
   const feedbackPrompt =
     "上記の文について、文法と自然さを検証し、フィードバックをお願いします。問題がない場合は、「問題ありません」とだけ記載してください。その後、訂正された文を提供してください。その際、文の丁寧さと調子を変えないでください、ロールプレイの途中にありますから。";
+
+  const message = getMessage(messageId);
 
   if (typeof message.extra !== "object") {
     message.extra = {};
@@ -117,15 +135,14 @@ async function getFeedback(messageId, message) {
 }
 
 function handleMessageEdited(messageId) {
-  const context = getContext();
-  const message = context.chat[messageId];
+  const message = getMessage(messageId);
 
   // only initiate feedback if the message has changed
   if (
     message?.is_user &&
     message.extra?.inputFeedback.message !== message.mes
   ) {
-    getFeedback(messageId, message);
+    getFeedback(messageId);
   }
 
   console.log("[InputFeedback] Message edited triggered. id: ", messageId);
@@ -133,11 +150,10 @@ function handleMessageEdited(messageId) {
 }
 
 function handleMessageSent(messageId) {
-  const context = getContext();
-  const message = context.chat[messageId];
+  const message = getMessage(messageId);
 
   if (message.is_user) {
-    getFeedback(messageId, message);
+    getFeedback(messageId);
   }
 
   console.log("[InputFeedback] Message sent triggered. id: ", messageId);
@@ -149,9 +165,10 @@ function handleChatChanged() {
   console.log("[InputFeedback] Chat changed");
   const messages = context.chat;
   console.log("[InputFeedback] messages:", messages);
-  messages.forEach((message, index) => {
+  messages.forEach((message, messageId) => {
     if (message.is_user && message.extra?.inputFeedback) {
-      displayFeedback(index, message.extra?.inputFeedback.feedback);
+      addFeedbackButton(messageId);
+      displayFeedback(messageId, message.extra?.inputFeedback.feedback);
     }
   });
 }
@@ -212,4 +229,11 @@ jQuery(async () => {
   eventSource.on(event_types.MESSAGE_EDITED, handleMessageEdited);
   eventSource.on(event_types.MESSAGE_SENT, handleMessageSent);
   eventSource.on(event_types.CHAT_CHANGED, handleChatChanged);
+
+  // Add feedback button to existing messages to trigger a feedback request
+  $(document).on("click", ".mes_feedback", function () {
+    const messageBlock = $(this).closest(".mes");
+    const messageId = Number(messageBlock.attr("mesid"));
+    getFeedback(messageId);
+  });
 });
