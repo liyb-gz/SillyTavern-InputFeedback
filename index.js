@@ -39,6 +39,7 @@ const defaultSettings = {};
  */
 // TODO: take prompt from settings
 // TODO: add feedback waiting animation
+// TODO: add feedback icon to new messages
 // TODO: delete a feedback
 // TODO: purge feedback
 // TODO: i18n
@@ -53,7 +54,7 @@ function getMessage(messageId) {
 function drawer(content, expended = false) {
   const direction = expended ? "up" : "down";
   const html = `
-  <div class="inline-drawer input-feedback">
+  <div class="inline-drawer input-feedback content">
     <div class="inline-drawer-toggle inline-drawer-header">
       <span data-i18n="[title]Input Feedback">Input Feedback</span>
       <div class="inline-drawer-icon fa-solid fa-circle-chevron-${direction} ${direction}"></div>
@@ -66,17 +67,40 @@ function drawer(content, expended = false) {
   return html;
 }
 
+function showLoading(messageId) {
+  console.log("[InputFeedback] showLoading:", messageId);
+  // Display loading indicator
+  const loadingIndicator = `
+  <div class="inline-drawer input-feedback loading-indicator">
+    <div class="inline-drawer-header">
+      <div class="inline-drawer-icon fa-solid fa-spell-check fa-beat-fade"></div>
+    </div>
+  </div>`;
+  $(`.mes[mesid="${messageId}"] .mes_block`).append(loadingIndicator);
+
+  // Hide feedback content
+  $(`.mes[mesid="${messageId}"] .mes_block .input-feedback.content`).hide();
+}
+
+function hideLoading(messageId) {
+  // Remove loading indicator
+  $(`.mes[mesid="${messageId}"] .mes_block .loading-indicator`).remove();
+
+  // Show feedback content
+  $(`.mes[mesid="${messageId}"] .mes_block .input-feedback.content`).show();
+}
+
 function displayFeedback(messageId) {
   const message = getMessage(messageId);
 
   const feedbackDiv = $(
-    `.mes[mesid="${messageId}"] .mes_block .input-feedback`
+    `.mes[mesid="${messageId}"] .mes_block .input-feedback.content`
   );
   const feedback = message?.extra?.inputFeedback?.feedback;
 
   if (feedbackDiv.length) {
     // If the div already exists, replace its content
-    feedbackDiv.html(feedback);
+    feedbackDiv.replaceWith(drawer(feedback));
   } else {
     // If the div doesn't exist, create it
     $(`.mes[mesid="${messageId}"] .mes_block`).append(drawer(feedback));
@@ -136,7 +160,9 @@ async function getFeedback(messageId) {
     .replace(/{{message}}/i, message.mes)
     .replace(/{{prompt}}/i, feedbackPrompt);
 
+  showLoading(messageId);
   const feedback = await generateRaw(prompt, null, false, true);
+  hideLoading(messageId);
 
   message.extra.inputFeedback = {
     // Save the original message for comparison later
