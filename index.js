@@ -30,7 +30,14 @@ const defaultSettings = {};
 // but its less urgent, as older language feedback is less useful
 
 // Refer to plugin: translate, memory (summarize)
-// TODO: add settings: language, prompt
+/* TODO: add settings
+    options:
+    -   prompt,
+    -   template,
+    -   enabled,
+    -   number of previous messages
+    -   feedback default folding
+ */
 // TODO: take prompt from settings
 // TODO: add feedback interface folding
 // TODO: add feedback waiting animation
@@ -38,14 +45,8 @@ const defaultSettings = {};
 // TODO: display feedback as markdown
 
 // The main script for the extension
-// The following are examples of some basic extension functionality
-
-function timeout(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
 
 function displayFeedback(messageId, messageStr) {
-  console.log("[InputFeedback] displayFeedback");
   let feedbackDiv = $(`.mes[mesid="${messageId}"] .mes_block .input-feedback`);
   if (feedbackDiv.length) {
     // If the div already exists, replace its content
@@ -58,14 +59,51 @@ function displayFeedback(messageId, messageStr) {
   }
 }
 
+function getPreviousMessages(messageId, numberOfPreviousMessages) {
+  const context = getContext();
+  const chats = context.chat;
+  const previousMessages = [];
+  for (
+    let i = messageId - 1;
+    i >= 0 && i >= messageId - numberOfPreviousMessages;
+    i--
+  ) {
+    const message = `${chats[i].name}: ${chats[i].mes}`;
+    previousMessages.unshift(message);
+  }
+  return previousMessages.join("\n\n");
+}
+
 async function getFeedback(messageId, message) {
+  const numberOfPreviousMessages = 5;
   const feedbackPrompt =
-    "上記の文を文法と自然さの観点で確認し、まず訂正された文を提供してください。その際、文の丁寧さと調子を変えないでください、ロールプレイの途中にありますから。その後、文の自然さと文法の正確さに関するフィードバックを提供してください。問題がない場合は、「問題ありません」と記載してください。";
+    "上記の文について、文法と自然さを検証し、フィードバックをお願いします。問題がない場合は、「問題ありません」とだけ記載してください。その後、訂正された文を提供してください。その際、文の丁寧さと調子を変えないでください、ロールプレイの途中にありますから。";
+
   if (typeof message.extra !== "object") {
     message.extra = {};
   }
 
-  const prompt = `${message.mes}\n\n---\n\n${feedbackPrompt}`;
+  const template = `
+    Previous Messages:
+    {{previousMessages}}
+
+    Current Message:
+    {{message}}
+
+    ---
+
+    {{prompt}}
+  `;
+
+  const previousMessages = getPreviousMessages(
+    messageId,
+    numberOfPreviousMessages
+  );
+
+  const prompt = template
+    .replace(/{{previousMessages}}/i, previousMessages ?? "None")
+    .replace(/{{message}}/i, message.mes)
+    .replace(/{{prompt}}/i, feedbackPrompt);
 
   const feedback = await generateRaw(prompt, null, false, true);
 
