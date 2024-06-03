@@ -188,7 +188,7 @@ function handleMessageEdited(messageId) {
   console.log("[InputFeedback] message: ", message);
 }
 
-function handleMessageSent(messageId) {
+function handleUserMessageRendered(messageId) {
   const message = getMessage(messageId);
 
   if (message.is_user) {
@@ -266,7 +266,7 @@ jQuery(async () => {
 
   // Register event listeners
   eventSource.on(event_types.MESSAGE_EDITED, handleMessageEdited);
-  eventSource.on(event_types.MESSAGE_SENT, handleMessageSent);
+  eventSource.on(event_types.USER_MESSAGE_RENDERED, handleUserMessageRendered);
   eventSource.on(event_types.CHAT_CHANGED, handleChatChanged);
 
   // Add feedback button to existing messages to trigger a feedback request
