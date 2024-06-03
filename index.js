@@ -23,8 +23,6 @@ const defaultSettings = {};
 // Related events
 // MESSAGE_SENT - get feedback
 // MESSAGE_EDITED - get feedback
-// USER_MESSAGE_RENDERED - render feedback
-// maybe rendering should not happen in handleUserMessageRendered, but after getting result from llm
 // CHAT_CHANGED - load feedback
 
 // Actually, may need to load more input feedback when "show more messages" is clicked, but no event for that yet;
@@ -41,9 +39,9 @@ const defaultSettings = {};
  */
 // TODO: take prompt from settings
 // TODO: add feedback waiting animation
-// TODO: remove blue backgroud
 // TODO: delete a feedback
 // TODO: purge feedback
+// TODO: i18n
 
 // The main script for the extension
 
@@ -225,8 +223,8 @@ function onButtonClick() {
 
 // This function is called when the extension is loaded
 jQuery(async () => {
-  // This is an example of loading HTML from a file
-  const settingsHtml = await $.get(`${extensionFolderPath}/example.html`);
+  // Loading settings html
+  const settingsHtml = await $.get(`${extensionFolderPath}/setting.html`);
 
   // Append settingsHtml to extensions_settings
   // extension_settings and extensions_settings2 are the left and right columns of the settings menu
