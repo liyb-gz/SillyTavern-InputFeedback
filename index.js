@@ -191,9 +191,8 @@ function handleMessageEdited(messageId) {
 function handleUserMessageRendered(messageId) {
   const message = getMessage(messageId);
 
-  if (message.is_user) {
-    getFeedback(messageId);
-  }
+  addFeedbackButton(messageId);
+  getFeedback(messageId);
 
   console.log("[InputFeedback] Message sent triggered. id: ", messageId);
   console.log("[InputFeedback] message: ", message);
