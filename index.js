@@ -164,6 +164,11 @@ async function getFeedback(messageId) {
 }
 
 function handleMessageEdited(messageId) {
+  // Only trigger feedback if auto is enabled
+  if (!extensionSettings.auto) {
+    return;
+  }
+
   const message = getMessage(messageId);
 
   // only initiate feedback if the message has changed
@@ -175,17 +180,19 @@ function handleMessageEdited(messageId) {
   }
 
   console.log("[InputFeedback] Message edited triggered. id: ", messageId);
-  console.log("[InputFeedback] message: ", message);
 }
 
 function handleUserMessageRendered(messageId) {
-  const message = getMessage(messageId);
-
   addFeedbackButton(messageId);
+
+  // Only trigger feedback if auto is enabled
+  if (!extensionSettings.auto) {
+    return;
+  }
+
   getFeedback(messageId);
 
   console.log("[InputFeedback] Message sent triggered. id: ", messageId);
-  console.log("[InputFeedback] message: ", message);
 }
 
 function handleChatChanged() {
@@ -194,9 +201,12 @@ function handleChatChanged() {
   const messages = context.chat;
   console.log("[InputFeedback] messages:", messages);
   messages.forEach((message, messageId) => {
-    if (message.is_user && message.extra?.inputFeedback) {
+    if (message.is_user) {
       addFeedbackButton(messageId);
-      displayFeedback(messageId, message.extra?.inputFeedback.feedback);
+
+      if (message.extra?.inputFeedback) {
+        displayFeedback(messageId, message.extra.inputFeedback.feedback);
+      }
     }
   });
 }
