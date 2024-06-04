@@ -18,7 +18,22 @@ import {
 const extensionName = "SillyTavern-InputFeedback";
 const extensionFolderPath = `scripts/extensions/third-party/${extensionName}`;
 const extensionSettings = extension_settings[extensionName];
-const defaultSettings = {};
+const defaultSettings = {
+  enabled: true,
+  auto: false,
+  folded: false,
+  template: `Previous Messages:
+{{previousMessages}}
+
+Current Message:
+{{message}}
+
+---
+
+{{prompt}}`,
+  prompt:
+    "Please check the message above regarding grammar and naturalness, and provide corresponding feedbacks. After that, please provide the corrected sentence. Do not change the politeness and tone of the sentence, as it is in the middle of a role play. If you didn't find a problem, please just state “This message looks good.” without any other comments.",
+};
 
 // Related events
 // MESSAGE_SENT - get feedback
@@ -38,8 +53,8 @@ const defaultSettings = {};
     -   feedback default folding
  */
 // TODO: take prompt from settings
-// TODO: add feedback waiting animation
-// TODO: add feedback icon to new messages
+// TODO: add feedback waiting animation (check)
+// TODO: add feedback icon to new messages (check)
 // TODO: delete a feedback
 // TODO: purge feedback
 // TODO: i18n
@@ -220,15 +235,51 @@ async function loadSettings() {
   }
 
   // Updating settings in the UI
-  $("#example_setting")
-    .prop("checked", extension_settings[extensionName].example_setting)
+  $("#input-feedback-enabled")
+    .prop("checked", extension_settings[extensionName].enabled)
+    .trigger("input");
+  $("#input-feedback-auto")
+    .prop("checked", extension_settings[extensionName].auto)
+    .trigger("input");
+  $("#input-feedback-folded")
+    .prop("checked", extension_settings[extensionName].folded)
+    .trigger("input");
+  $("#input-feedback-template")
+    .val(extension_settings[extensionName].template)
+    .trigger("input");
+  $("#input-feedback-prompt")
+    .val(extension_settings[extensionName].prompt)
     .trigger("input");
 }
 
-// This function is called when the extension settings are changed in the UI
-function onExampleInput(event) {
+function onEnabledInput(event) {
   const value = Boolean($(event.target).prop("checked"));
-  extension_settings[extensionName].example_setting = value;
+  extension_settings[extensionName].enabled = value;
+  saveSettingsDebounced();
+}
+
+function onAutoInput(event) {
+  const value = Boolean($(event.target).prop("checked"));
+  extension_settings[extensionName].auto = value;
+  saveSettingsDebounced();
+}
+
+function onFoldedInput(event) {
+  const value = Boolean($(event.target).prop("checked"));
+  extension_settings[extensionName].folded = value;
+  saveSettingsDebounced();
+}
+
+function onTemplateInput() {
+  console.log($(this));
+  const value = $(this).val();
+  extension_settings[extensionName].template = value;
+  saveSettingsDebounced();
+}
+
+function onPromptInput() {
+  const value = $(this).val();
+  extension_settings[extensionName].prompt = value;
   saveSettingsDebounced();
 }
 
@@ -238,9 +289,7 @@ function onButtonClick() {
   // Let's make a popup appear with the checked setting
   toastr.info(
     `The checkbox is ${
-      extension_settings[extensionName].example_setting
-        ? "checked"
-        : "not checked"
+      extension_settings[extensionName].enabled ? "enabled" : "not enabled"
     }`,
     "A popup appeared because you clicked the button!"
   );
@@ -258,7 +307,11 @@ jQuery(async () => {
 
   // These are examples of listening for events
   $("#my_button").on("click", onButtonClick);
-  $("#example_setting").on("input", onExampleInput);
+  $("#input-feedback-enabled").on("input", onEnabledInput);
+  $("#input-feedback-auto").on("input", onAutoInput);
+  $("#input-feedback-folded").on("input", onFoldedInput);
+  $("#input-feedback-template").on("input", onTemplateInput);
+  $("#input-feedback-prompt").on("input", onPromptInput);
 
   // Load settings when starting things up (if you have any)
   loadSettings();
