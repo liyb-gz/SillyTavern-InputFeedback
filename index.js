@@ -8,10 +8,12 @@ import { renderTemplateAsync } from "../../../templates.js";
 
 import {
   saveSettingsDebounced,
+  saveChatDebounced,
   eventSource,
   event_types,
   generateRaw,
   messageFormatting,
+  getCurrentChatId,
 } from "../../../../script.js";
 
 // Keep track of where your extension is located, name should match repo name
@@ -48,11 +50,7 @@ Current Message:
 // but its less urgent, as older language feedback is less useful
 
 // Refer to plugin: translate, memory (summarize)
-// TODO: when module is disabled,
-//  - remove feedback button
-//  - remove feedback drawer
 // TODO: delete a feedback
-// TODO: purge feedback
 // Case: no chat selected
 // TODO: i18n
 
@@ -298,16 +296,27 @@ function onNumPrevMsgsInput() {
   saveSettingsDebounced();
 }
 
-// This function is called when the purge button is clicked
 function onPurgeClick() {
-  // You can do whatever you want here
-  // Let's make a popup appear with the checked setting
-  toastr.info(
-    `The checkbox is ${
-      extension_settings[extensionName].enabled ? "enabled" : "not enabled"
-    }`,
-    "A popup appeared because you clicked the button!"
-  );
+  if (!getCurrentChatId()) {
+    toastr.info("No chat selected.");
+    return;
+  }
+
+  // Remove all feedbacks from chat files
+  const context = getContext();
+  const messages = context.chat;
+  messages.forEach((message) => {
+    if (message.extra?.inputFeedback) {
+      delete message.extra.inputFeedback;
+    }
+  });
+
+  saveChatDebounced();
+
+  // Remove all feedbacks from interface
+  $(".input-feedback.content").remove();
+
+  toastr.success("All feedbacks purged.");
 }
 
 // This function is called when the extension is loaded
