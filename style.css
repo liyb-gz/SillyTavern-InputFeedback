@@ -10,3 +10,12 @@
 .input-feedback.inline-drawer .inline-drawer-header {
   color: var(--SmartThemeEmColor);
 }
+
+.input-feedback-extension-settings .inline-drawer .inline-drawer-content {
+  padding-bottom: 1em;
+}
+
+.input-feedback-setting-title,
+.input-feedback-button-container {
+  padding-top: 0.5em;
+}

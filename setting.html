@@ -10,20 +10,90 @@
     </div>
     <div class="inline-drawer-content">
       <div class="input-feedback-extension_block flex-container">
-        <input
-          id="my_button"
-          class="menu_button"
-          type="submit"
-          value="Example Button"
-        />
-      </div>
-
-      <div class="input-feedback-extension_block flex-container">
         <input id="example_setting" type="checkbox" />
         <label for="example_setting">This is an example</label>
       </div>
 
-      <hr class="sysHR" />
+      <div class="input-feedback-extension_block flex-container">
+        <input id="input-feedback-enabled" type="checkbox" />
+        <label for="input-feedback-enabled">Enabled</label>
+      </div>
+
+      <div class="input-feedback-extension_block flex-container">
+        <input id="input-feedback-folded" type="checkbox" />
+        <label for="input-feedback-folded">Fold feedback by default</label>
+      </div>
+
+      <div class="input-feedback-extension_block flex-container">
+        <div
+          class="justifyspacebetween alignitemscenter input-feedback-setting-title"
+        >
+          <span class="flex1" data-i18n="[title]Template">Template</span>
+        </div>
+        <textarea
+          id="input-feedback-template"
+          class="text_pole textarea_compact"
+          rows="6"
+          data-i18n="[placeholder]input-feedback-template-placeholder"
+          placeholder="The feedback request will be sent to AI in this format."
+        ></textarea>
+        <small data-i18n="input-feedback-template-tips"
+          >Make sure <code>{{previousMessages}}</code>,
+          <code>{{message}}</code> and <code>{{prompt}}</code> are in the
+          template.</small
+        >
+      </div>
+
+      <div class="input-feedback-extension_block flex-container">
+        <div
+          class="justifyspacebetween alignitemscenter input-feedback-setting-title"
+        >
+          <span class="flex1" data-i18n="[title]Prompt">Prompt</span>
+        </div>
+        <textarea
+          id="input-feedback-prompt"
+          class="text_pole textarea_compact"
+          rows="6"
+          data-i18n="[placeholder]input-feedback-prompt-placeholder"
+          placeholder="This prompt will be sent to AI to request for the input feedback."
+        ></textarea>
+      </div>
+
+      <div class="input-feedback-extension_block flex-container">
+        <label
+          for="input-feedback-num-prev-msgs"
+          class="title_restorable input-feedback-setting-title"
+        >
+          <span>
+            <span data-i18n="input-feedback-num-prev-msgs-1"
+              >Request input feedback along with</span
+            >
+            <span id="input-feedback-num-prev-msgs_value"></span
+            ><span data-i18n="input-feedback-num-prev-msgs-2">
+              previous messages.</span
+            >
+          </span>
+        </label>
+        <input
+          id="input-feedback-num-prev-msgs"
+          type="range"
+          value="{{defaultSettings.numPrevMsgs}}"
+          min="{{defaultSettings.numPrevMsgsMin}}"
+          max="{{defaultSettings.numPrevMsgsMax}}"
+          step="{{defaultSettings.numPrevMsgsStep}}"
+        />
+      </div>
+
+      <div
+        class="input-feedback-extension_block flex-container input-feedback-button-container"
+      >
+        <input
+          id="my_button"
+          class="menu_button"
+          type="submit"
+          value="Purge all feedbacks"
+        />
+      </div>
     </div>
   </div>
 </div>
