@@ -1,11 +1,11 @@
-//You'll likely need to import extension_settings, getContext, and loadExtensionSettings from extensions.js
 import {
   extension_settings,
   getContext,
   loadExtensionSettings,
 } from "../../../extensions.js";
 
-//You'll likely need to import some other functions from the main script
+import { renderTemplateAsync } from "../../../templates.js";
+
 import {
   saveSettingsDebounced,
   eventSource,
@@ -33,6 +33,10 @@ Current Message:
 {{prompt}}`,
   prompt:
     "Please check the message above regarding grammar and naturalness, and provide corresponding feedbacks. After that, please provide the corrected sentence. Do not change the politeness and tone of the sentence, as it is in the middle of a role play. If you didn't find a problem, please just state “This message looks good.” without any other comments.",
+  numPrevMsgs: 5,
+  numPrevMsgsMin: 0,
+  numPrevMsgsMax: 20,
+  numPrevMsgsStep: 1,
 };
 
 // Related events
@@ -44,14 +48,6 @@ Current Message:
 // but its less urgent, as older language feedback is less useful
 
 // Refer to plugin: translate, memory (summarize)
-/* TODO: add settings
-    options:
-    -   prompt,
-    -   template,
-    -   enabled,
-    -   number of previous messages
-    -   feedback default folding
- */
 // TODO: take prompt from settings
 // TODO: add feedback waiting animation (check)
 // TODO: add feedback icon to new messages (check)
@@ -83,7 +79,6 @@ function drawer(content, expended = false) {
 }
 
 function showLoading(messageId) {
-  console.log("[InputFeedback] showLoading:", messageId);
   // Display loading indicator
   const loadingIndicator = `
   <div class="inline-drawer input-feedback loading-indicator">
@@ -128,13 +123,9 @@ function addFeedbackButton(messageId) {
   );
 }
 
-function getPreviousMessages(messageId, numberOfPreviousMessages) {
+function getPreviousMessages(messageId, numPrevMsgs) {
   const previousMessages = [];
-  for (
-    let i = messageId - 1;
-    i >= 0 && i >= messageId - numberOfPreviousMessages;
-    i--
-  ) {
+  for (let i = messageId - 1; i >= 0 && i >= messageId - numPrevMsgs; i--) {
     const message = getMessage(i);
     const messageStr = `${message.name}: ${message.mes}`;
     previousMessages.unshift(messageStr);
@@ -143,32 +134,14 @@ function getPreviousMessages(messageId, numberOfPreviousMessages) {
 }
 
 async function getFeedback(messageId) {
-  const numberOfPreviousMessages = 5;
-  const feedbackPrompt =
-    "上記の文について、文法と自然さを検証し、フィードバックをお願いします。問題がない場合は、「問題ありません」とだけ記載してください。その後、訂正された文を提供してください。その際、文の丁寧さと調子を変えないでください、ロールプレイの途中にありますから。";
-
+  const { numPrevMsgs, prompt: feedbackPrompt, template } = extensionSettings;
   const message = getMessage(messageId);
 
   if (typeof message.extra !== "object") {
     message.extra = {};
   }
 
-  const template = `
-    Previous Messages:
-    {{previousMessages}}
-
-    Current Message:
-    {{message}}
-
-    ---
-
-    {{prompt}}
-  `;
-
-  const previousMessages = getPreviousMessages(
-    messageId,
-    numberOfPreviousMessages
-  );
+  const previousMessages = getPreviousMessages(messageId, numPrevMsgs);
 
   const prompt = template
     .replace(/{{previousMessages}}/i, previousMessages ?? "None")
@@ -250,6 +223,9 @@ async function loadSettings() {
   $("#input-feedback-prompt")
     .val(extension_settings[extensionName].prompt)
     .trigger("input");
+  $("#input-feedback-num-prev-msgs")
+    .val(extension_settings[extensionName].numPrevMsgs)
+    .trigger("input");
 }
 
 function onEnabledInput(event) {
@@ -283,6 +259,15 @@ function onPromptInput() {
   saveSettingsDebounced();
 }
 
+function onNumPrevMsgsInput() {
+  const value = $(this).val();
+  extension_settings[extensionName].numPrevMsgs = Number(value);
+  $("#input-feedback-num-prev-msgs_value").html(
+    extension_settings[extensionName].numPrevMsgs
+  );
+  saveSettingsDebounced();
+}
+
 // This function is called when the button is clicked
 function onButtonClick() {
   // You can do whatever you want here
@@ -298,20 +283,29 @@ function onButtonClick() {
 // This function is called when the extension is loaded
 jQuery(async () => {
   // Loading settings html
-  const settingsHtml = await $.get(`${extensionFolderPath}/setting.html`);
+  const settingsHtml = await renderTemplateAsync(
+    `${extensionFolderPath}/setting.html`,
+    {
+      defaultSettings,
+    },
+    true,
+    true,
+    true
+  );
 
   // Append settingsHtml to extensions_settings
   // extension_settings and extensions_settings2 are the left and right columns of the settings menu
   // Left should be extensions that deal with system functions and right should be visual/UI related
   $("#extensions_settings2").append(settingsHtml);
 
-  // These are examples of listening for events
+  // These are listeners for events
   $("#my_button").on("click", onButtonClick);
   $("#input-feedback-enabled").on("input", onEnabledInput);
   $("#input-feedback-auto").on("input", onAutoInput);
   $("#input-feedback-folded").on("input", onFoldedInput);
   $("#input-feedback-template").on("input", onTemplateInput);
   $("#input-feedback-prompt").on("input", onPromptInput);
+  $("#input-feedback-num-prev-msgs").on("input", onNumPrevMsgsInput);
 
   // Load settings when starting things up (if you have any)
   loadSettings();
