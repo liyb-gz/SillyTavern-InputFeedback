@@ -48,9 +48,12 @@ Current Message:
 // but its less urgent, as older language feedback is less useful
 
 // Refer to plugin: translate, memory (summarize)
-// TODO: take prompt from settings
+// TODO: when module is disabled,
+//  - remove feedback button
+//  - remove feedback drawer
 // TODO: delete a feedback
 // TODO: purge feedback
+// Case: no chat selected
 // TODO: i18n
 
 // The main script for the extension
@@ -163,7 +166,7 @@ async function getFeedback(messageId) {
 
 function handleMessageEdited(messageId) {
   // Only trigger feedback if auto is enabled
-  if (!extensionSettings.auto) {
+  if (!extensionSettings.enabled || !extensionSettings.auto) {
     return;
   }
 
@@ -181,6 +184,10 @@ function handleMessageEdited(messageId) {
 }
 
 function handleUserMessageRendered(messageId) {
+  if (!extensionSettings.enabled) {
+    return;
+  }
+
   addFeedbackButton(messageId);
 
   // Only trigger feedback if auto is enabled
@@ -194,6 +201,10 @@ function handleUserMessageRendered(messageId) {
 }
 
 function handleChatChanged() {
+  if (!extensionSettings.enabled) {
+    return;
+  }
+
   const context = getContext();
   console.log("[InputFeedback] Chat changed");
   const messages = context.chat;
@@ -239,9 +250,18 @@ async function loadSettings() {
 }
 
 function onEnabledInput(event) {
-  const value = Boolean($(event.target).prop("checked"));
-  extension_settings[extensionName].enabled = value;
+  const enabled = Boolean($(event.target).prop("checked"));
+  extension_settings[extensionName].enabled = enabled;
   saveSettingsDebounced();
+
+  if (!enabled) {
+    // Remove feedback button and drawer if the extension is disabled
+    $(".mes_feedback").remove();
+    $(".input-feedback.content").remove();
+  } else {
+    // Add feedback button to existing messages if the extension is enabled
+    handleChatChanged();
+  }
 }
 
 function onAutoInput(event) {
@@ -327,6 +347,9 @@ jQuery(async () => {
 
   // Add feedback button to existing messages to trigger a feedback request
   $(document).on("click", ".mes_feedback", function () {
+    if (!extensionSettings.enabled) {
+      return;
+    }
     const messageBlock = $(this).closest(".mes");
     const messageId = Number(messageBlock.attr("mesid"));
     getFeedback(messageId);
