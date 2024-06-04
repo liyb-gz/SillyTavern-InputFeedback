@@ -62,8 +62,8 @@ function getMessage(messageId) {
   return context.chat[messageId];
 }
 
-function drawer(content, expended = false) {
-  const direction = expended ? "up" : "down";
+function drawer(content, folded = true) {
+  const direction = folded ? "down" : "up";
   const html = `
   <div class="inline-drawer input-feedback content">
     <div class="inline-drawer-toggle inline-drawer-header">
@@ -71,7 +71,7 @@ function drawer(content, expended = false) {
       <div class="inline-drawer-icon fa-solid fa-circle-chevron-${direction} ${direction}"></div>
     </div>
     <div class="inline-drawer-content" ${
-      expended && `style="display:block"`
+      !folded && `style="display:block"`
     }>${messageFormatting(content)}</div>
   </div>`;
 
@@ -110,10 +110,12 @@ function displayFeedback(messageId) {
 
   if (feedbackDiv.length) {
     // If the div already exists, replace its content
-    feedbackDiv.replaceWith(drawer(feedback));
+    feedbackDiv.replaceWith(drawer(feedback, extensionSettings.folded));
   } else {
     // If the div doesn't exist, create it
-    $(`.mes[mesid="${messageId}"] .mes_block`).append(drawer(feedback));
+    $(`.mes[mesid="${messageId}"] .mes_block`).append(
+      drawer(feedback, extensionSettings.folded)
+    );
   }
 }
 
