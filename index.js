@@ -49,8 +49,6 @@ Current Message:
 
 // Refer to plugin: translate, memory (summarize)
 // TODO: take prompt from settings
-// TODO: add feedback waiting animation (check)
-// TODO: add feedback icon to new messages (check)
 // TODO: delete a feedback
 // TODO: purge feedback
 // TODO: i18n
@@ -280,8 +278,8 @@ function onNumPrevMsgsInput() {
   saveSettingsDebounced();
 }
 
-// This function is called when the button is clicked
-function onButtonClick() {
+// This function is called when the purge button is clicked
+function onPurgeClick() {
   // You can do whatever you want here
   // Let's make a popup appear with the checked setting
   toastr.info(
@@ -311,13 +309,13 @@ jQuery(async () => {
   $("#extensions_settings2").append(settingsHtml);
 
   // These are listeners for events
-  $("#my_button").on("click", onButtonClick);
   $("#input-feedback-enabled").on("input", onEnabledInput);
   $("#input-feedback-auto").on("input", onAutoInput);
   $("#input-feedback-folded").on("input", onFoldedInput);
   $("#input-feedback-template").on("input", onTemplateInput);
   $("#input-feedback-prompt").on("input", onPromptInput);
   $("#input-feedback-num-prev-msgs").on("input", onNumPrevMsgsInput);
+  $("#input-feedback-purge").on("click", onPurgeClick);
 
   // Load settings when starting things up (if you have any)
   loadSettings();
