@@ -50,83 +50,48 @@ Current Message:
 // but its less urgent, as older language feedback is less useful
 
 // Refer to plugin: translate, memory (summarize)
-// TODO: delete a feedback
 // TODO: readme
-// TODO: Feedback cannot save?
 // TODO: split auto for new, auto for edited
 // TODO: i18n
+// TODO: test number input without template rendering
 // TODO: slash command to request feedback
 // TODO: slash command to remove feedback
 // TODO: slash command to request feedback for all messages
 
 // The main script for the extension
 
+// Loads the extension settings if they exist, otherwise initializes them to the defaults.
+async function loadSettings() {
+  //Create the settings if they don't exist
+  extension_settings[extensionName] = extension_settings[extensionName] || {};
+  if (Object.keys(extension_settings[extensionName]).length === 0) {
+    Object.assign(extension_settings[extensionName], defaultSettings);
+  }
+
+  // Updating settings in the UI
+  $("#input-feedback-enabled")
+    .prop("checked", extension_settings[extensionName].enabled)
+    .trigger("input");
+  $("#input-feedback-auto")
+    .prop("checked", extension_settings[extensionName].auto)
+    .trigger("input");
+  $("#input-feedback-folded")
+    .prop("checked", extension_settings[extensionName].folded)
+    .trigger("input");
+  $("#input-feedback-template")
+    .val(extension_settings[extensionName].template)
+    .trigger("input");
+  $("#input-feedback-prompt")
+    .val(extension_settings[extensionName].prompt)
+    .trigger("input");
+  $("#input-feedback-num-prev-msgs")
+    .val(extension_settings[extensionName].numPrevMsgs)
+    .trigger("input");
+}
+
 function getMessage(messageId) {
   const context = getContext();
   return context.chat[messageId];
-}
-
-function drawer(content, folded = true) {
-  const direction = folded ? "down" : "up";
-  const html = `
-  <div class="inline-drawer input-feedback content">
-    <div class="inline-drawer-toggle inline-drawer-header">
-      <span data-i18n="[title]Input Feedback">Input Feedback</span>
-      <div class="inline-drawer-icon fa-solid fa-circle-chevron-${direction} ${direction}"></div>
-    </div>
-    <div class="inline-drawer-content" ${
-      !folded && `style="display:block"`
-    }>${messageFormatting(content)}</div>
-  </div>`;
-
-  return html;
-}
-
-function showLoading(messageId) {
-  // Display loading indicator
-  const loadingIndicator = `
-  <div class="inline-drawer input-feedback loading-indicator">
-    <div class="inline-drawer-header">
-      <div class="inline-drawer-icon fa-solid fa-spell-check fa-beat-fade"></div>
-    </div>
-  </div>`;
-  $(`.mes[mesid="${messageId}"] .mes_block`).append(loadingIndicator);
-
-  // Hide feedback content
-  $(`.mes[mesid="${messageId}"] .mes_block .input-feedback.content`).hide();
-}
-
-function hideLoading(messageId) {
-  // Remove loading indicator
-  $(`.mes[mesid="${messageId}"] .mes_block .loading-indicator`).remove();
-
-  // Show feedback content
-  $(`.mes[mesid="${messageId}"] .mes_block .input-feedback.content`).show();
-}
-
-function displayFeedback(messageId) {
-  const message = getMessage(messageId);
-
-  const feedbackDiv = $(
-    `.mes[mesid="${messageId}"] .mes_block .input-feedback.content`
-  );
-  const feedback = message?.extra?.inputFeedback?.feedback;
-
-  if (feedbackDiv.length) {
-    // If the div already exists, replace its content
-    feedbackDiv.replaceWith(drawer(feedback, extensionSettings.folded));
-  } else {
-    // If the div doesn't exist, create it
-    $(`.mes[mesid="${messageId}"] .mes_block`).append(
-      drawer(feedback, extensionSettings.folded)
-    );
-  }
-}
-
-function addFeedbackButton(messageId) {
-  $(`.mes[mesid=${messageId}] .mes_block .extraMesButtons`).append(
-    `<div title="Request Feedback" class="mes_feedback fa-solid fa-spell-check" data-i18n="[title]Request Feedback"></div>`
-  );
 }
 
 function getPreviousMessages(messageId, numPrevMsgs) {
@@ -166,6 +131,16 @@ async function getFeedback(messageId) {
 
   saveChatDebounced();
   displayFeedback(messageId, message.extra.inputFeedback.feedback);
+}
+
+function deleteMessage(messageId) {
+  // Remove feedback from the file
+  const message = getMessage(messageId);
+  delete message.extra.inputFeedback;
+  saveChatDebounced();
+
+  // Remove feedback from interface
+  $(`.mes[mesid="${messageId}"] .mes_block .input-feedback.content`).remove();
 }
 
 function handleMessageEdited(messageId) {
@@ -222,35 +197,6 @@ function handleChatChanged() {
       }
     }
   });
-}
-
-// Loads the extension settings if they exist, otherwise initializes them to the defaults.
-async function loadSettings() {
-  //Create the settings if they don't exist
-  extension_settings[extensionName] = extension_settings[extensionName] || {};
-  if (Object.keys(extension_settings[extensionName]).length === 0) {
-    Object.assign(extension_settings[extensionName], defaultSettings);
-  }
-
-  // Updating settings in the UI
-  $("#input-feedback-enabled")
-    .prop("checked", extension_settings[extensionName].enabled)
-    .trigger("input");
-  $("#input-feedback-auto")
-    .prop("checked", extension_settings[extensionName].auto)
-    .trigger("input");
-  $("#input-feedback-folded")
-    .prop("checked", extension_settings[extensionName].folded)
-    .trigger("input");
-  $("#input-feedback-template")
-    .val(extension_settings[extensionName].template)
-    .trigger("input");
-  $("#input-feedback-prompt")
-    .val(extension_settings[extensionName].prompt)
-    .trigger("input");
-  $("#input-feedback-num-prev-msgs")
-    .val(extension_settings[extensionName].numPrevMsgs)
-    .trigger("input");
 }
 
 function onEnabledInput(event) {
@@ -325,6 +271,71 @@ function onPurgeClick() {
   toastr.success("All feedbacks purged.");
 }
 
+function drawer(content, folded = true) {
+  const direction = folded ? "down" : "up";
+  const html = `
+  <div class="inline-drawer input-feedback content">
+    <div class="inline-drawer-toggle inline-drawer-header">
+      <span data-i18n="[title]Input Feedback">Input Feedback</span>
+      <div class="inline-drawer-icon fa-solid fa-circle-chevron-${direction} ${direction}"></div>
+    </div>
+    <div class="inline-drawer-content" ${
+      !folded && `style="display:block"`
+    }>${messageFormatting(content)}
+      <div class="menu_button fa-solid fa-trash-can input-feedback-delete-button" title="Delete feedback" data-i18n="[title]Delete feedback"></div>
+    </div>
+  </div>`;
+
+  return html;
+}
+
+function showLoading(messageId) {
+  // Display loading indicator
+  const loadingIndicator = `
+  <div class="inline-drawer input-feedback loading-indicator">
+    <div class="inline-drawer-header">
+      <div class="inline-drawer-icon fa-solid fa-spell-check fa-beat-fade"></div>
+    </div>
+  </div>`;
+  $(`.mes[mesid="${messageId}"] .mes_block`).append(loadingIndicator);
+
+  // Hide feedback content
+  $(`.mes[mesid="${messageId}"] .mes_block .input-feedback.content`).hide();
+}
+
+function hideLoading(messageId) {
+  // Remove loading indicator
+  $(`.mes[mesid="${messageId}"] .mes_block .loading-indicator`).remove();
+
+  // Show feedback content
+  $(`.mes[mesid="${messageId}"] .mes_block .input-feedback.content`).show();
+}
+
+function displayFeedback(messageId) {
+  const message = getMessage(messageId);
+
+  const feedbackDiv = $(
+    `.mes[mesid="${messageId}"] .mes_block .input-feedback.content`
+  );
+  const feedback = message?.extra?.inputFeedback?.feedback;
+
+  if (feedbackDiv.length) {
+    // If the div already exists, replace its content
+    feedbackDiv.replaceWith(drawer(feedback, extensionSettings.folded));
+  } else {
+    // If the div doesn't exist, create it
+    $(`.mes[mesid="${messageId}"] .mes_block`).append(
+      drawer(feedback, extensionSettings.folded)
+    );
+  }
+}
+
+function addFeedbackButton(messageId) {
+  $(`.mes[mesid=${messageId}] .mes_block .extraMesButtons`).append(
+    `<div title="Request Feedback" class="mes_feedback fa-solid fa-spell-check" data-i18n="[title]Request Feedback"></div>`
+  );
+}
+
 // This function is called when the extension is loaded
 jQuery(async () => {
   // Loading settings html
@@ -368,5 +379,14 @@ jQuery(async () => {
     const messageBlock = $(this).closest(".mes");
     const messageId = Number(messageBlock.attr("mesid"));
     getFeedback(messageId);
+  });
+
+  $(document).on("click", ".input-feedback-delete-button", function () {
+    if (!extensionSettings.enabled) {
+      return;
+    }
+    const messageBlock = $(this).closest(".mes");
+    const messageId = Number(messageBlock.attr("mesid"));
+    deleteMessage(messageId);
   });
 });
