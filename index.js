@@ -51,8 +51,13 @@ Current Message:
 
 // Refer to plugin: translate, memory (summarize)
 // TODO: delete a feedback
-// Case: no chat selected
+// TODO: readme
+// TODO: Feedback cannot save?
+// TODO: split auto for new, auto for edited
 // TODO: i18n
+// TODO: slash command to request feedback
+// TODO: slash command to remove feedback
+// TODO: slash command to request feedback for all messages
 
 // The main script for the extension
 
