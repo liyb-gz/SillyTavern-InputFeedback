@@ -151,7 +151,8 @@ function handleMessageEdited(messageId) {
   // only initiate feedback if the message has changed
   if (
     message?.is_user &&
-    message.extra?.inputFeedback.message !== message.mes
+    message.extra?.inputFeedback &&
+    message.extra.inputFeedback.message !== message.mes
   ) {
     getFeedback(messageId);
   }
