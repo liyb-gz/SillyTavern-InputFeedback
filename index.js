@@ -164,6 +164,7 @@ async function getFeedback(messageId) {
     feedback,
   };
 
+  saveChatDebounced();
   displayFeedback(messageId, message.extra.inputFeedback.feedback);
 }
 
