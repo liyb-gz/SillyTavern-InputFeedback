@@ -4,8 +4,6 @@ import {
   loadExtensionSettings,
 } from "../../../extensions.js";
 
-import { renderTemplateAsync } from "../../../templates.js";
-
 import {
   saveSettingsDebounced,
   saveChatDebounced,
@@ -53,7 +51,6 @@ Current Message:
 // TODO: readme
 // TODO: split auto for new, auto for edited
 // TODO: i18n
-// TODO: test number input without template rendering
 // TODO: slash command to request feedback
 // TODO: slash command to remove feedback
 // TODO: slash command to request feedback for all messages
@@ -339,15 +336,7 @@ function addFeedbackButton(messageId) {
 // This function is called when the extension is loaded
 jQuery(async () => {
   // Loading settings html
-  const settingsHtml = await renderTemplateAsync(
-    `${extensionFolderPath}/setting.html`,
-    {
-      defaultSettings,
-    },
-    true,
-    true,
-    true
-  );
+  const settingsHtml = await $.get(`${extensionFolderPath}/setting.html`);
 
   // Append settingsHtml to extensions_settings
   // extension_settings and extensions_settings2 are the left and right columns of the settings menu
