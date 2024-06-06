@@ -20,7 +20,8 @@ const extensionFolderPath = `scripts/extensions/third-party/${extensionName}`;
 const extensionSettings = extension_settings[extensionName];
 const defaultSettings = {
   enabled: true,
-  auto: false,
+  autoNew: false,
+  autoEdit: false,
   folded: false,
   template: `Previous Messages:
 {{previousMessages}}
@@ -48,7 +49,6 @@ Current Message:
 // but its less urgent, as older language feedback is less useful
 
 // Refer to plugin: translate, memory (summarize)
-// TODO: split auto for new, auto for edited
 // TODO: i18n
 // TODO: slash command to request feedback
 // TODO: slash command to remove feedback
@@ -68,8 +68,11 @@ async function loadSettings() {
   $("#input-feedback-enabled")
     .prop("checked", extension_settings[extensionName].enabled)
     .trigger("input");
-  $("#input-feedback-auto")
-    .prop("checked", extension_settings[extensionName].auto)
+  $("#input-feedback-auto-new")
+    .prop("checked", extension_settings[extensionName].autoNew)
+    .trigger("input");
+  $("#input-feedback-auto-edit")
+    .prop("checked", extension_settings[extensionName].autoEdit)
     .trigger("input");
   $("#input-feedback-folded")
     .prop("checked", extension_settings[extensionName].folded)
@@ -141,7 +144,7 @@ function deleteMessage(messageId) {
 
 function handleMessageEdited(messageId) {
   // Only trigger feedback if auto is enabled
-  if (!extensionSettings.enabled || !extensionSettings.auto) {
+  if (!extensionSettings.enabled || !extensionSettings.autoEdit) {
     return;
   }
 
@@ -167,7 +170,7 @@ function handleUserMessageRendered(messageId) {
   addFeedbackButton(messageId);
 
   // Only trigger feedback if auto is enabled
-  if (!extensionSettings.auto) {
+  if (!extensionSettings.autoNew) {
     return;
   }
 
@@ -210,9 +213,15 @@ function onEnabledInput(event) {
   }
 }
 
-function onAutoInput(event) {
+function onAutoNewInput(event) {
   const value = Boolean($(event.target).prop("checked"));
-  extension_settings[extensionName].auto = value;
+  extension_settings[extensionName].autoNew = value;
+  saveSettingsDebounced();
+}
+
+function onAutoEditInput(event) {
+  const value = Boolean($(event.target).prop("checked"));
+  extension_settings[extensionName].autoEdit = value;
   saveSettingsDebounced();
 }
 
@@ -343,7 +352,8 @@ jQuery(async () => {
 
   // These are listeners for events
   $("#input-feedback-enabled").on("input", onEnabledInput);
-  $("#input-feedback-auto").on("input", onAutoInput);
+  $("#input-feedback-auto-new").on("input", onAutoNewInput);
+  $("#input-feedback-auto-edit").on("input", onAutoEditInput);
   $("#input-feedback-folded").on("input", onFoldedInput);
   $("#input-feedback-template").on("input", onTemplateInput);
   $("#input-feedback-prompt").on("input", onPromptInput);
