@@ -48,12 +48,11 @@ Current Message:
 // but its less urgent, as older language feedback is less useful
 
 // Refer to plugin: translate, memory (summarize)
-// TODO: readme
 // TODO: split auto for new, auto for edited
 // TODO: i18n
 // TODO: slash command to request feedback
 // TODO: slash command to remove feedback
-// TODO: slash command to request feedback for all messages
+// TODO: (?) slash command to request feedback for all messages
 
 // The main script for the extension
 
@@ -185,7 +184,6 @@ function handleChatChanged() {
   const context = getContext();
   console.log("[InputFeedback] Chat changed");
   const messages = context.chat;
-  console.log("[InputFeedback] messages:", messages);
   messages.forEach((message, messageId) => {
     if (message.is_user) {
       addFeedbackButton(messageId);
@@ -225,7 +223,6 @@ function onFoldedInput(event) {
 }
 
 function onTemplateInput() {
-  console.log($(this));
   const value = $(this).val();
   extension_settings[extensionName].template = value;
   saveSettingsDebounced();
