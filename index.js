@@ -14,6 +14,8 @@ import {
   getCurrentChatId,
 } from "../../../../script.js";
 
+import { applyLocale } from "../../../../scripts/i18n.js";
+
 // Keep track of where your extension is located, name should match repo name
 const extensionName = "SillyTavern-InputFeedback";
 const extensionFolderPath = `scripts/extensions/third-party/${extensionName}`;
@@ -170,11 +172,9 @@ function handleUserMessageRendered(messageId) {
   addFeedbackButton(messageId);
 
   // Only trigger feedback if auto is enabled
-  if (!extensionSettings.autoNew) {
-    return;
+  if (extensionSettings.autoNew) {
+    getFeedback(messageId);
   }
-
-  getFeedback(messageId);
 
   console.log("[InputFeedback] Message sent triggered. id: ", messageId);
 }
@@ -280,7 +280,7 @@ function drawer(content, folded = true) {
   const html = `
   <div class="inline-drawer input-feedback content">
     <div class="inline-drawer-toggle inline-drawer-header">
-      <span data-i18n="[title]Input Feedback">Input Feedback</span>
+      <span data-i18n="Input Feedback">Input Feedback</span>
       <div class="inline-drawer-icon fa-solid fa-circle-chevron-${direction} ${direction}"></div>
     </div>
     <div class="inline-drawer-content" ${
@@ -332,12 +332,22 @@ function displayFeedback(messageId) {
       drawer(feedback, extensionSettings.folded)
     );
   }
+
+  applyLocale(feedbackDiv.get(0));
 }
 
 function addFeedbackButton(messageId) {
-  $(`.mes[mesid=${messageId}] .mes_block .extraMesButtons`).append(
+  //   $(`.mes[mesid=${messageId}] .mes_block .extraMesButtons`).append(
+  //     `<div title="Request Feedback" class="mes_feedback fa-solid fa-spell-check" data-i18n="[title]Request Feedback"></div>`
+  //   );
+  const extraButtons = $(
+    `.mes[mesid=${messageId}] .mes_block .extraMesButtons`
+  );
+  extraButtons.append(
     `<div title="Request Feedback" class="mes_feedback fa-solid fa-spell-check" data-i18n="[title]Request Feedback"></div>`
   );
+
+  applyLocale(extraButtons.find(".mes_feedback").get(0));
 }
 
 // This function is called when the extension is loaded

@@ -1,0 +1,15 @@
+{
+  "Input Feedback": "輸入回饋",
+  "Delete feedback": "刪除回饋",
+  "Request Feedback": "獲取回饋",
+  "Auto feedback for new messages": "發送新訊息後自動獲取回饋",
+  "Auto feedback for edited messages": "編輯訊息後自動獲取回饋",
+  "Fold feedback by default": "默認折起回饋",
+  "Template": "範本",
+  "The feedback request will be sent to AI in this format.": "以此格式向AI發送回饋請求",
+  "input-feedback-template-tips": "請確保範本內包含 {{previousMessages}}, {{message}} 及 {{prompt}}。",
+  "This prompt will be sent to AI to request for the input feedback.": "向AI發送回饋請求的提示",
+  "input-feedback-num-prev-msgs-1": "發送回饋請求時附上",
+  "input-feedback-num-prev-msgs-2": " 條先前訊息",
+  "Purge all feedbacks": "清除所有回饋"
+}

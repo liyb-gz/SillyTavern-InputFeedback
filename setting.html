@@ -3,7 +3,7 @@
 <div class="input-feedback-extension-settings">
   <div class="inline-drawer">
     <div class="inline-drawer-toggle inline-drawer-header">
-      <b>Input Feedback</b>
+      <b data-i18n="Input Feedback">Input Feedback</b>
       <div
         class="inline-drawer-icon fa-solid fa-circle-chevron-down down"
       ></div>
@@ -11,39 +11,45 @@
     <div class="inline-drawer-content">
       <div class="input-feedback-extension_block flex-container">
         <input id="input-feedback-enabled" type="checkbox" />
-        <label for="input-feedback-enabled">Enabled</label>
+        <label for="input-feedback-enabled" data-i18n="Enabled">Enabled</label>
       </div>
 
       <div class="input-feedback-extension_block flex-container">
         <input id="input-feedback-auto-new" type="checkbox" />
-        <label for="input-feedback-auto-new"
+        <label
+          for="input-feedback-auto-new"
+          data-i18n="Auto feedback for new messages"
           >Auto feedback for new messages</label
         >
       </div>
 
       <div class="input-feedback-extension_block flex-container">
         <input id="input-feedback-auto-edit" type="checkbox" />
-        <label for="input-feedback-auto-edit"
+        <label
+          for="input-feedback-auto-edit"
+          data-i18n="Auto feedback for edited messages"
           >Auto feedback for edited messages</label
         >
       </div>
 
       <div class="input-feedback-extension_block flex-container">
         <input id="input-feedback-folded" type="checkbox" />
-        <label for="input-feedback-folded">Fold feedback by default</label>
+        <label for="input-feedback-folded" data-i18n="Fold feedback by default"
+          >Fold feedback by default</label
+        >
       </div>
 
       <div class="input-feedback-extension_block flex-container">
         <div
           class="justifyspacebetween alignitemscenter input-feedback-setting-title"
         >
-          <span class="flex1" data-i18n="[title]Template">Template</span>
+          <span class="flex1" data-i18n="Template">Template</span>
         </div>
         <textarea
           id="input-feedback-template"
           class="text_pole textarea_compact"
           rows="6"
-          data-i18n="[placeholder]input-feedback-template-placeholder"
+          data-i18n="[placeholder]The feedback request will be sent to AI in this format."
           placeholder="The feedback request will be sent to AI in this format."
         ></textarea>
         <small data-i18n="input-feedback-template-tips"
@@ -57,13 +63,13 @@
         <div
           class="justifyspacebetween alignitemscenter input-feedback-setting-title"
         >
-          <span class="flex1" data-i18n="[title]Prompt">Prompt</span>
+          <span class="flex1" data-i18n="Prompt">Prompt</span>
         </div>
         <textarea
           id="input-feedback-prompt"
           class="text_pole textarea_compact"
           rows="6"
-          data-i18n="[placeholder]input-feedback-prompt-placeholder"
+          data-i18n="[placeholder]This prompt will be sent to AI to request for the input feedback."
           placeholder="This prompt will be sent to AI to request for the input feedback."
         ></textarea>
       </div>
@@ -99,6 +105,7 @@
           id="input-feedback-purge"
           class="menu_button"
           type="button"
+          data-i18n="[value]Purge all feedbacks"
           value="Purge all feedbacks"
         />
       </div>
