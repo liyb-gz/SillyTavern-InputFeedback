@@ -51,7 +51,6 @@ Current Message:
 // but its less urgent, as older language feedback is less useful
 
 // Refer to plugin: translate, memory (summarize)
-// TODO: i18n
 // TODO: slash command to request feedback
 // TODO: slash command to remove feedback
 // TODO: (?) slash command to request feedback for all messages

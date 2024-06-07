@@ -6,6 +6,6 @@
   "js": "index.js",
   "css": "style.css",
   "author": "Felix Li",
-  "version": "0.0.1",
-  "homePage": "yourUrlHere"
+  "version": "0.1.0",
+  "homePage": "https://github.com/liyb-gz/SillyTavern-InputFeedback"
 }
